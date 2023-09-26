@@ -1,26 +1,37 @@
 package main
 
 import (
-	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego/v2/client/orm"
+	// don't forget this
+	_ "github.com/go-sql-driver/mysql"
 )
 
-type UserController struct {
-	web.Controller
+// User -
+type User struct {
+	ID       int    `orm:"column(id)"`
+	Name     string `orm:"column(username)"`
+	Password string `orm:"column(password)"`
 }
 
-func (u *UserController) HelloWorld() {
-	u.Ctx.WriteString("hello, world")
+func init() {
+	// need to register models in init
+	orm.RegisterModel(new(User))
 
-}
-
-func (u *UserController) Index() {
-	u.TplName = "index.html"
-	u.Render()
+	// need to register default database
+	orm.RegisterDataBase("default", "mysql", "root:Aa1248800211@tcp(127.0.0.1:3306)/gotest?charset=utf8")
 }
 
 func main() {
-	web.SetStaticPath("/", "blog")
-	//web.CtrlGet("/", (*UserController).Index)
-	web.CtrlGet("/helloworld", (*UserController).HelloWorld)
-	web.Run()
+	// automatically build table
+	orm.RunSyncdb("default", false, true)
+
+	// create orm object
+	o := orm.NewOrm()
+
+	// data
+	user := new(User)
+	user.Name = "mike"
+
+	// insert data
+	o.Insert(user)
 }
