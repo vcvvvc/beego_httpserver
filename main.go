@@ -5,7 +5,9 @@ import (
 )
 
 func init() {
-	models.RegisterDB()
+	// need to register models in init
+	//models.InsertDB()
+	models.DeleteDB(1)
 }
 
 func main() {
