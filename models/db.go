@@ -1,8 +1,11 @@
 package models
 
 import (
-	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/server/web"
+	"fmt"
+	"github.com/beego/beego/v2/client/orm"
+	"time"
+
+	// don't forget this
 
 	// don't forget this
 	_ "github.com/go-sql-driver/mysql"
@@ -13,10 +16,30 @@ type Config struct {
 }
 
 // User -
+//type User struct {
+//	Id int `json:"id" orm:"pk;auto;description(主键id)"` // 设置主键且自动增长
+//	Name string `json:"name" orm:"index;unique;size(50);description(用户名)"` // 唯一的且加了索引的
+//	Age int `json:"age" orm:"default(0);description(年龄)"`
+//	Salary float64 `json:"price" orm:"digits(12);decimals(2);description(薪资)"`
+//	Address string `json:"address" orm:"size(100);null;column(address);description(地址)"` // 可以为空
+//	// 创建时间字段
+//	CreateAt *time.Time `json:"create_at" orm:"auto_now_add;type(datetime);description(创建时间)"`
+//	UpdateAt *time.Time `json:"update_at" orm:"auto_now;type(datetime);description(更新时间)"`
+//}
+
 type User struct {
-	ID       int    `orm:"column(id)"`
-	Name     string `orm:"column(username)"`
-	Password string `orm:"column(password)"`
+	ID            int       `orm:"column(id);index;unique"`
+	UserName      string    `orm:"column(username);unique"`
+	PassWord      string    `orm:"column(password)"`
+	Register_time time.Time `orm:"column(register_time)"`
+}
+
+func init() {
+	// need to register models in init
+	orm.RegisterModel(new(User))
+
+	// need to register default database
+	orm.RegisterDataBase("default", "mysql", "6923403:zxz123456@tcp(192.168.31.172:3306)/User?charset=utf8&parseTime=true&loc=Local")
 }
 
 // 设置引擎为 INNODB
@@ -24,17 +47,58 @@ func (u *User) TableEngine() string {
 	return "INNODB"
 }
 
-const ConfigFile = "./conf/app.conf"
+// 指定Order结构体默认绑定的表名
+func (o *User) TableName() string {
+	return "users"
+}
 
-func RegisterDB() {
-	err := web.LoadAppConfig("conf", ConfigFile)
-	if err != nil {
-		logs.Critical("An error occurred:", err)
-		panic(err)
+func InsertDB() {
+	orm.Debug = true
+	orm.RunSyncdb("default", false, true)
+
+	o := orm.NewOrm()
+
+	// 创建一个新的订单
+	users := []User{
+		{ID: 0, UserName: "用户名", PassWord: "zxzmima123456", Register_time: time.Now()},
+		{ID: 1, UserName: "vc", PassWord: "123", Register_time: time.Now()},
 	}
 
-	val, _ := web.AppConfig.String("name")
+	us := new(User)
+	// 对order对象赋值
+	us.ID = 0
+	us.UserName = "用户名"
+	us.PassWord = "zxzmima123456"
+	us.Register_time = time.Now()
 
-	logs.Info("load config name is", val)
+	nums, err := o.InsertMulti(2, users)
+	if err != nil {
+		fmt.Println("插入失败")
+	} else {
+		// 插入成功会返回插入数据自增字段，生成的id
+		fmt.Println("新插入数据的id为:", nums)
+	}
 
+	id, err := o.Insert(us)
+	if err != nil {
+		fmt.Println("插入失败")
+	} else {
+		// 插入成功会返回插入数据自增字段，生成的id
+		fmt.Println("新插入数据的id为:", id)
+	}
+
+}
+
+func DeleteDB(int) {
+	o := orm.NewOrm()
+	us := new(User)
+	us.ID = 1
+
+	id, err := o.Delete(us)
+	if err != nil {
+		fmt.Println("删除失败")
+	} else {
+		// 插入成功会返回插入数据自增字段，生成的id
+		fmt.Println("删除的数据id为:", id)
+	}
 }
