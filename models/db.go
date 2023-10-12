@@ -1,14 +1,11 @@
 package models
 
 import (
+	"context"
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
-	"time"
-
-	// don't forget this
-
-	// don't forget this
 	_ "github.com/go-sql-driver/mysql"
+	"time"
 )
 
 type Config struct {
@@ -40,6 +37,8 @@ func init() {
 
 	// need to register default database
 	orm.RegisterDataBase("default", "mysql", "6923403:zxz123456@tcp(192.168.31.172:3306)/User?charset=utf8&parseTime=true&loc=Local")
+	orm.Debug = true
+	orm.RunSyncdb("default", false, true)
 }
 
 // 设置引擎为 INNODB
@@ -53,46 +52,46 @@ func (o *User) TableName() string {
 }
 
 func InsertDB() {
-	orm.Debug = true
-	orm.RunSyncdb("default", false, true)
-
 	o := orm.NewOrm()
+	// 在闭包内执行事务处理
+	err := o.DoTx(func(ctx context.Context, txOrm orm.TxOrmer) error {
+		// 准备数据
+		user := new(User)
+		user.UserName = "test_transaction"
+		user.PassWord = "jtestvvvv000"
+		user.Register_time = time.Now()
 
-	// 创建一个新的订单
-	users := []User{
-		{ID: 0, UserName: "用户名", PassWord: "zxzmima123456", Register_time: time.Now()},
-		{ID: 1, UserName: "vc", PassWord: "123", Register_time: time.Now()},
-	}
-
-	us := new(User)
-	// 对order对象赋值
-	us.ID = 0
-	us.UserName = "用户名"
-	us.PassWord = "zxzmima123456"
-	us.Register_time = time.Now()
-
-	nums, err := o.InsertMulti(2, users)
+		// 插入数据
+		// 使用txOrm执行SQL
+		_, e := txOrm.Insert(user)
+		return e
+	})
 	if err != nil {
-		fmt.Println("插入失败")
+		println(err)
 	} else {
-		// 插入成功会返回插入数据自增字段，生成的id
-		fmt.Println("新插入数据的id为:", nums)
+		println("插入成功")
 	}
 
-	id, err := o.Insert(us)
-	if err != nil {
-		fmt.Println("插入失败")
-	} else {
-		// 插入成功会返回插入数据自增字段，生成的id
-		fmt.Println("新插入数据的id为:", id)
-	}
+	//us := new(User)
+	//// 对order对象赋值
+	//us.UserName = "vcvc"
+	//us.PassWord = "zxzmima123456"
+	//us.Register_time = time.Now()
+	//
+	//id, err := o.Insert(us)
+	//if err != nil {
+	//	fmt.Println("插入失败")
+	//} else {
+	//	// 插入成功会返回插入数据自增字段，生成的id
+	//	fmt.Println("新插入数据的id为:", id)
+	//}
 
 }
 
-func DeleteDB(int) {
+func DeleteDB(uid int) {
 	o := orm.NewOrm()
 	us := new(User)
-	us.ID = 1
+	us.ID = uid
 
 	id, err := o.Delete(us)
 	if err != nil {
@@ -101,4 +100,22 @@ func DeleteDB(int) {
 		// 插入成功会返回插入数据自增字段，生成的id
 		fmt.Println("删除的数据id为:", id)
 	}
+}
+
+func UpdatePWD(uid int, pwd string) {
+	o := orm.NewOrm()
+	us := new(User)
+	us.ID = uid
+	us.PassWord = pwd
+
+	id, err := o.Update(us, "password")
+	if err != nil {
+		fmt.Println("更新失败")
+	} else if id == 1 {
+		// 插入成功会返回插入数据自增字段，生成的id
+		fmt.Println("更新成功")
+	} else {
+		println("其他问题")
+	}
+
 }
