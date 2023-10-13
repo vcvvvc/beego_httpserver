@@ -38,7 +38,6 @@ func init() {
 	// need to register default database
 	orm.RegisterDataBase("default", "mysql", "6923403:zxz123456@tcp(192.168.31.172:3306)/User?charset=utf8&parseTime=true&loc=Local")
 	orm.Debug = true
-	orm.RunSyncdb("default", false, true)
 }
 
 // 设置引擎为 INNODB
@@ -52,6 +51,7 @@ func (o *User) TableName() string {
 }
 
 func InsertDB() {
+	orm.RunSyncdb("default", false, true)
 	o := orm.NewOrm()
 	// 在闭包内执行事务处理
 	err := o.DoTx(func(ctx context.Context, txOrm orm.TxOrmer) error {
@@ -118,4 +118,20 @@ func UpdatePWD(uid int, pwd string) {
 		println("其他问题")
 	}
 
+}
+
+func SearchUser(uid int, username string) {
+	o := orm.NewOrm()
+	us := new(User)
+	us.ID = uid
+	if username != "" {
+		us.UserName = username
+	}
+
+	err := o.Read(us)
+	if err != nil {
+		println("查询出错，", err)
+	} else {
+		println("查询成功", us.ID, us.UserName, us.PassWord, us.Register_time.String())
+	}
 }
