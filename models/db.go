@@ -4,13 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/config"
 	_ "github.com/go-sql-driver/mysql"
 	"time"
 )
-
-type Config struct {
-	// ...
-}
 
 // User -
 //type User struct {
@@ -31,12 +28,23 @@ type User struct {
 	Register_time time.Time `orm:"column(register_time)"`
 }
 
-func init() {
+func Init() {
+	dbhost, _ := config.String("dbhost")
+	dbport, _ := config.String("dbport")
+	dbuser, _ := config.String("dbuser")
+	dbpassword, _ := config.String("dbpassword")
+	dbname, _ := config.String("dbname")
+	if dbport == "" {
+		dbport = "3306"
+	}
+	dsn := dbuser + ":" + dbpassword + "@tcp(" + dbhost + ":" + dbport + ")/" + dbname + "?charset=utf8&parseTime=true&loc=Local"
+	orm.RegisterDataBase("default", "mysql", dsn)
+	//orm.RegisterModel(new(User), new(Category), new(Post), new(Config), new(Comment))
 	// need to register models in init
 	orm.RegisterModel(new(User))
 
 	// need to register default database
-	orm.RegisterDataBase("default", "mysql", "6923403:zxz123456@tcp(192.168.31.172:3306)/User?charset=utf8&parseTime=true&loc=Local")
+	//orm.RegisterDataBase("default", "mysql", "6923403:zxz123456@tcp(192.168.31.172:3306)/User?charset=utf8&parseTime=true&loc=Local")
 	orm.Debug = true
 }
 
