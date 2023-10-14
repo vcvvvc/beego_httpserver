@@ -1,16 +1,16 @@
 package main
 
-import "httpserver/models"
+import (
+	"github.com/beego/beego/v2/server/web"
+	"httpserver/models"
+	_ "httpserver/routers"
+)
 
 func init() {
-	// need to register models in init
-	//models.InsertDB()
-	//models.DeleteDB(3)
-	//models.UpdatePWD(2, "tesxxxxtvvvvv")
-	models.SearchUser(5, "test_transaction")
+	models.Init()
+	web.BConfig.WebConfig.Session.SessionOn = true
 }
 
 func main() {
-	println("")
-
+	web.Run()
 }
