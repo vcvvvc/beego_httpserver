@@ -6,8 +6,10 @@ import (
 )
 
 func init() {
-	web.CtrlGet("/", (*controllers.UserController).Register)
-	//web.CtrlGet("/Register", (*controllers.UserController).Register)
+	web.CtrlGet("/", (*controllers.RegisterController).RegisterPage)
+	web.CtrlPost("/register", (*controllers.RegisterController).Register)
+	web.CtrlGet("/loginPage", (*controllers.LoginController).loginPage)
+	web.CtrlPost("/login", (*controllers.LoginController).login)
 
 	//beego.Router("/home", &controllers.BlogController{}, "*:Home")
 	//beego.Router("/article", &controllers.BlogController{}, "*:Article")

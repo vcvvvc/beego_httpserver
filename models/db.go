@@ -46,6 +46,7 @@ func Init() {
 	// need to register default database
 	//orm.RegisterDataBase("default", "mysql", "6923403:zxz123456@tcp(192.168.31.172:3306)/User?charset=utf8&parseTime=true&loc=Local")
 	orm.Debug = true
+	orm.RunSyncdb("default", false, true)
 }
 
 // 设置引擎为 INNODB
@@ -58,15 +59,14 @@ func (o *User) TableName() string {
 	return "users"
 }
 
-func InsertDB() {
-	orm.RunSyncdb("default", false, true)
+func InsertUser(username string, password string) bool {
 	o := orm.NewOrm()
 	// 在闭包内执行事务处理
 	err := o.DoTx(func(ctx context.Context, txOrm orm.TxOrmer) error {
 		// 准备数据
 		user := new(User)
-		user.UserName = "test_transaction"
-		user.PassWord = "jtestvvvv000"
+		user.UserName = username
+		user.PassWord = password
 		user.Register_time = time.Now()
 
 		// 插入数据
@@ -76,8 +76,10 @@ func InsertDB() {
 	})
 	if err != nil {
 		println(err)
+		return false
 	} else {
 		println("插入成功")
+		return true
 	}
 
 	//us := new(User)
@@ -128,18 +130,20 @@ func UpdatePWD(uid int, pwd string) {
 
 }
 
-func SearchUser(uid int, username string) {
+func SearchUser(username string) int {
 	o := orm.NewOrm()
 	us := new(User)
-	us.ID = uid
 	if username != "" {
 		us.UserName = username
+	} else {
+		return 0
 	}
 
-	err := o.Read(us)
+	err := o.Read(us, "username")
 	if err != nil {
 		println("查询出错，", err)
+		return 0
 	} else {
-		println("查询成功", us.ID, us.UserName, us.PassWord, us.Register_time.String())
+		return us.ID
 	}
 }
