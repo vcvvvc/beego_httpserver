@@ -9,6 +9,7 @@ import (
 func init() {
 	models.Init()
 	web.BConfig.WebConfig.Session.SessionOn = true
+
 }
 
 func main() {
