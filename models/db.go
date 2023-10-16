@@ -75,10 +75,10 @@ func InsertUser(username string, password string) bool {
 		return e
 	})
 	if err != nil {
-		println(err)
+		fmt.Println(err)
 		return false
 	} else {
-		println("插入成功")
+		fmt.Println("插入成功")
 		return true
 	}
 
@@ -125,7 +125,7 @@ func UpdatePWD(uid int, pwd string) {
 		// 插入成功会返回插入数据自增字段，生成的id
 		fmt.Println("更新成功")
 	} else {
-		println("其他问题")
+		fmt.Println("其他问题")
 	}
 
 }
@@ -141,9 +141,40 @@ func SearchUser(username string) int {
 
 	err := o.Read(us, "username")
 	if err != nil {
-		println("查询出错，", err)
+		fmt.Println("查询出错，", err)
 		return 0
 	} else {
 		return us.ID
 	}
+}
+
+type ULogin struct {
+	username string
+	password string
+}
+
+func UserLogin(username string, password string) bool {
+	// 获取 QueryBuilder 对象。需要指定数据库驱动参数。
+	// 第二个返回值是错误对象，在这里略过
+	var users []User
+	qb, _ := orm.NewQueryBuilder("mysql")
+	// 构建查询对象
+	qb.Select("*").
+		From("users").
+		Where("username = ? AND password = ?")
+
+	// 导出 SQL 语句
+	sql := qb.String()
+
+	// 执行 SQL 语句
+	o := orm.NewOrm()
+	id, err := o.Raw(sql, username, password).QueryRows(&users)
+	if id == 1 {
+		return true
+	}
+
+	fmt.Println(err, id)
+	return false
+
+	// 处理查询结果（根据实际需求）
 }
