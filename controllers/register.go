@@ -8,15 +8,15 @@ import (
 	"httpserver/util"
 )
 
-type UserController struct {
+type RegisterController struct {
 	web.Controller
 }
 
-func (u *UserController) RegisterPage() {
+func (u *RegisterController) RegisterPage() {
 	u.TplName = "register.html"
 }
 
-func (u *UserController) Register() {
+func (u *RegisterController) Register() {
 	username := u.GetString("username")
 	password := u.GetString("password")
 	println("username, password")
@@ -26,7 +26,7 @@ func (u *UserController) Register() {
 		u.Data["json"] = map[string]interface{}{"code": 0, "message": "用户名已经存在"}
 		err := u.ServeJSON()
 		if err != nil {
-			return
+			fmt.Println(err)
 		}
 		return
 	}
@@ -39,7 +39,7 @@ func (u *UserController) Register() {
 	if res == true {
 		u.Data["json"] = map[string]interface{}{"code": 1, "message": "注册成功"}
 	} else {
-		u.Data["json"] = map[string]interface{}{"code": 0, "message": "注册失败"}
+		u.Data["json"] = map[string]interface{}{"code": -1, "message": "注册失败"}
 	}
 	err := u.ServeJSON()
 	if err != nil {
