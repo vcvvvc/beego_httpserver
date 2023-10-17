@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/beego/beego/v2/server/web"
 )
 
@@ -13,8 +12,7 @@ type BaseController struct {
 
 // 判断是否登录
 func (b *BaseController) UserIsLogin() {
-	loginuser := b.GetSession("loginuser")
-	fmt.Println("loginuser---->", loginuser)
+	loginuser := b.GetSession("Loginuser")
 	if loginuser != nil {
 		b.IsLogin = true
 		b.Loginuser = loginuser
