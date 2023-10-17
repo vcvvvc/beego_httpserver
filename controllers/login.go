@@ -29,8 +29,19 @@ func (l *LoginController) Login() {
 		return
 	}
 
-	l.SetSession("loginuser", username)
+	l.SetSession("Loginuser", username)
 	l.Data["json"] = map[string]interface{}{"code": 2, "message": "账号登录成功"}
 	l.ServeJSON()
 
+}
+
+func (c *LoginController) TestInputGet() {
+	//读取session
+	username := c.GetSession("username")
+	//password := c.GetSession("password")
+	if nameString, ok := username.(string); ok && nameString != "" {
+		c.Ctx.WriteString("Username:" + username.(string))
+	} else {
+		fmt.Println("session error")
+	}
 }
