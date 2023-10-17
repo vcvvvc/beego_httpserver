@@ -6,12 +6,16 @@ import (
 )
 
 func init() {
-	web.CtrlGet("/", (*controllers.RegisterController).RegisterPage)
-	web.CtrlPost("/register", (*controllers.RegisterController).Register)
-	web.CtrlGet("/login", (*controllers.LoginController).LoginPage)
-	web.CtrlPost("/loginreq", (*controllers.LoginController).Login)
+	//HOME
+	web.CtrlGet("/", (*controllers.HomeController).HomePage)
 
-	//beego.Router("/home", &controllers.BlogController{}, "*:Home")
-	//
-	//beego.AutoRouter(&controllers.AdminController{})
+	//Register
+	web.CtrlGet("/register", (*controllers.RegisterController).RegisterPage)
+	web.CtrlPost("/user_register", (*controllers.RegisterController).Register)
+
+	//Login
+	web.CtrlGet("/login", (*controllers.LoginController).LoginPage)
+	web.CtrlPost("/user_login", (*controllers.LoginController).Login)
+	web.CtrlGet("/session_input", (*controllers.LoginController).TestInputGet)
+	web.CtrlGet("/exit", (*controllers.LoginController).UserExit)
 }
