@@ -1,7 +1,6 @@
-package models
+package util
 
 import (
-	"context"
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/config"
@@ -22,10 +21,20 @@ import (
 //}
 
 type User struct {
-	ID            int       `orm:"column(id);index;unique"`
+	ID            int       `orm:"column(id);auto;index;unique"`
 	UserName      string    `orm:"column(username);unique"`
 	PassWord      string    `orm:"column(password)"`
 	Register_time time.Time `orm:"column(register_time)"`
+}
+
+type Article struct {
+	Id         int       `orm:"column(id);auto;index;unique"`
+	Title      string    `orm:"column(username)"`
+	Tags       string    `orm:"column(tags)"`
+	Short      string    `orm:"column(short)"`
+	Content    string    `orm:"column(content)"`
+	Author     string    `orm:"column(author)"`
+	Createtime time.Time `orm:"column(create_time)"`
 }
 
 func Init() {
@@ -41,16 +50,21 @@ func Init() {
 	orm.RegisterDataBase("default", "mysql", dsn)
 	//orm.RegisterModel(new(User), new(Category), new(Post), new(Config), new(Comment))
 	// need to register models in init
-	orm.RegisterModel(new(User))
+	orm.RegisterModel(new(User), new(Article))
 
 	// need to register default database
 	//orm.RegisterDataBase("default", "mysql", "6923403:zxz123456@tcp(192.168.31.172:3306)/User?charset=utf8&parseTime=true&loc=Local")
 	orm.Debug = true
-	orm.RunSyncdb("default", false, true)
+	//orm.RunSyncdb("default", false, true)
 }
 
 // 设置引擎为 INNODB
-func (u *User) TableEngine() string {
+func (ue *User) TableEngine() string {
+	return "INNODB"
+}
+
+// 设置引擎为 INNODB
+func (ae *Article) TableEngine() string {
 	return "INNODB"
 }
 
@@ -59,43 +73,40 @@ func (o *User) TableName() string {
 	return "users"
 }
 
-func InsertUser(username string, password string) bool {
-	o := orm.NewOrm()
-	// 在闭包内执行事务处理
-	err := o.DoTx(func(ctx context.Context, txOrm orm.TxOrmer) error {
-		// 准备数据
-		user := new(User)
-		user.UserName = username
-		user.PassWord = password
-		user.Register_time = time.Now()
+// 指定Order结构体默认绑定的表名
+func (a *Article) TableName() string {
+	return "article"
+}
 
-		// 插入数据
-		// 使用txOrm执行SQL
-		_, e := txOrm.Insert(user)
-		return e
-	})
+func InsertUser(username string, password string) bool {
+	if username == "" {
+		return false
+	}
+
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.InsertInto("User.users", "`username`, `password`, `register_time`").
+		Values("?", "?", "?")
+	sql := qb.String()
+	// 执行 SQL 语句
+	o := orm.NewOrm()
+	res, err := o.Raw(sql, username, password, time.Now()).Exec()
+	// 执行SQL语句
+	//res, err := o.Raw(sql, values...).Exec()
 	if err != nil {
 		fmt.Println(err)
 		return false
-	} else {
-		fmt.Println("插入成功")
-		return true
 	}
 
-	//us := new(User)
-	//// 对order对象赋值
-	//us.UserName = "vcvc"
-	//us.PassWord = "zxzmima123456"
-	//us.Register_time = time.Now()
-	//
-	//id, err := o.Insert(us)
-	//if err != nil {
-	//	fmt.Println("插入失败")
-	//} else {
-	//	// 插入成功会返回插入数据自增字段，生成的id
-	//	fmt.Println("新插入数据的id为:", id)
-	//}
+	// 获取影响的行数
+	id, err := res.LastInsertId()
+	//num, _ := res.RowsAffected()
+	//num, err := res.LastInsertId()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(id)
 
+	return true
 }
 
 func DeleteDB(uid int) {
@@ -130,22 +141,28 @@ func UpdatePWD(uid int, pwd string) {
 
 }
 
-func SearchUser(username string) int {
-	o := orm.NewOrm()
-	us := new(User)
-	if username != "" {
-		us.UserName = username
-	} else {
-		return 0
+func SearchUser(username string) bool {
+	var users []User
+	if username == "" {
+		return false
 	}
 
-	err := o.Read(us, "username")
-	if err != nil {
-		fmt.Println("查询出错，", err)
-		return 0
-	} else {
-		return us.ID
+	qb, _ := orm.NewQueryBuilder("mysql")
+	qb.Select("*").
+		From("User.users").
+		Where("username = ?")
+	sql := qb.String()
+	// 执行 SQL 语句
+	o := orm.NewOrm()
+	id, err := o.Raw(sql, username).QueryRows(&users)
+	fmt.Println(id)
+	if id == 0 {
+		fmt.Println(err)
+		return false
 	}
+
+	fmt.Println("UID: ", users[0].ID, " ,username: ", users[0].UserName)
+	return true
 }
 
 type ULogin struct {
@@ -160,8 +177,10 @@ func UserLogin(username string, password string) bool {
 	qb, _ := orm.NewQueryBuilder("mysql")
 	// 构建查询对象
 	qb.Select("*").
-		From("users").
+		From("User.users").
 		Where("username = ? AND password = ?")
+	//limit {number | all}：表示最多返回多少行数据，如果是all，表示返回所有数据。
+	//offset number：表示跳过多少行数据，从第number+1行开始返回。
 
 	// 导出 SQL 语句
 	sql := qb.String()
@@ -172,8 +191,10 @@ func UserLogin(username string, password string) bool {
 	if id == 1 {
 		return true
 	}
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	fmt.Println(err, id)
 	return false
 
 	// 处理查询结果（根据实际需求）
