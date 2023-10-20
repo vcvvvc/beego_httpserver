@@ -2,9 +2,7 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web"
-	"httpserver/models"
 	"httpserver/util"
 )
 
@@ -21,8 +19,8 @@ func (u *RegisterController) Register() {
 	password := u.GetString("password")
 	println("username, password")
 
-	id := models.SearchUser(username)
-	if id != 0 {
+	unreg := util.SearchUserDB(username)
+	if unreg == true {
 		u.Data["json"] = map[string]interface{}{"code": 0, "message": "用户名已经存在"}
 		err := u.ServeJSON()
 		if err != nil {
@@ -35,7 +33,7 @@ func (u *RegisterController) Register() {
 	password = util.Md5(password)
 	fmt.Println("md5后：", password)
 
-	res := models.InsertUser(username, password)
+	res := util.InsertUserDB(username, password)
 	if res == true {
 		u.Data["json"] = map[string]interface{}{"code": 1, "message": "注册成功"}
 	} else {
@@ -45,5 +43,4 @@ func (u *RegisterController) Register() {
 	if err != nil {
 		return
 	}
-	logs.Info(username, password)
 }

@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"github.com/beego/beego/v2/server/web"
-	"httpserver/models"
 	"httpserver/util"
 )
 
@@ -19,8 +18,8 @@ func (u *LoginController) Login() {
 	username := u.GetString("username")
 	password := u.GetString("password")
 	password_md5 := util.Md5(password)
-	m_success := models.UserLogin(username, password_md5)
-	if !m_success {
+	m_success := util.UserLoginDB(username, password_md5)
+	if m_success != true {
 		u.Data["json"] = map[string]interface{}{"code": -2, "message": "密码不正确"}
 		err := u.ServeJSON()
 		if err != nil {
