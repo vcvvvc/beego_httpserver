@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/beego/beego/v2/server/web"
-	"httpserver/models"
 	_ "httpserver/routers"
+	"httpserver/util"
 )
 
 func init() {
-	models.Init()
+	util.Init()
 	web.BConfig.WebConfig.Session.SessionOn = true
 
 }
