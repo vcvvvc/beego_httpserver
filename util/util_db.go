@@ -29,7 +29,7 @@ type User struct {
 
 type Article struct {
 	Id         int       `orm:"column(id);auto;index;unique"`
-	Title      string    `orm:"column(username)"`
+	Title      string    `orm:"column(title)"`
 	Tags       string    `orm:"column(tags)"`
 	Short      string    `orm:"column(short)"`
 	Content    string    `orm:"column(content)"`
@@ -78,7 +78,7 @@ func (a *Article) TableName() string {
 	return "article"
 }
 
-func InsertUser(username string, password string) bool {
+func InsertUserDB(username string, password string) bool {
 	if username == "" {
 		return false
 	}
@@ -109,39 +109,7 @@ func InsertUser(username string, password string) bool {
 	return true
 }
 
-func DeleteDB(uid int) {
-	o := orm.NewOrm()
-	us := new(User)
-	us.ID = uid
-
-	id, err := o.Delete(us)
-	if err != nil {
-		fmt.Println("删除失败")
-	} else {
-		// 插入成功会返回插入数据自增字段，生成的id
-		fmt.Println("删除的数据id为:", id)
-	}
-}
-
-func UpdatePWD(uid int, pwd string) {
-	o := orm.NewOrm()
-	us := new(User)
-	us.ID = uid
-	us.PassWord = pwd
-
-	id, err := o.Update(us, "password")
-	if err != nil {
-		fmt.Println("更新失败")
-	} else if id == 1 {
-		// 插入成功会返回插入数据自增字段，生成的id
-		fmt.Println("更新成功")
-	} else {
-		fmt.Println("其他问题")
-	}
-
-}
-
-func SearchUser(username string) bool {
+func SearchUserDB(username string) bool {
 	var users []User
 	if username == "" {
 		return false
@@ -170,7 +138,7 @@ type ULogin struct {
 	password string
 }
 
-func UserLogin(username string, password string) bool {
+func UserLoginDB(username string, password string) bool {
 	// 获取 QueryBuilder 对象。需要指定数据库驱动参数。
 	// 第二个返回值是错误对象，在这里略过
 	var users []User
@@ -196,6 +164,37 @@ func UserLogin(username string, password string) bool {
 	}
 
 	return false
+}
 
-	// 处理查询结果（根据实际需求）
+func InsertArticleDB(sql string, title string, author string, tags string, short string, content string) bool {
+	o := orm.NewOrm()
+	res, err := o.Raw(sql, title, author, tags, short, content, time.Now()).Exec()
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	// 获取影响的行数
+	id, err := res.LastInsertId()
+	//num, _ := res.RowsAffected()
+	//num, err := res.LastInsertId()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(id)
+
+	return true
+}
+
+func QueryArticleDB(sql string) ([]Article, error) {
+	o := orm.NewOrm()
+	var artList []Article
+	res, err := o.Raw(sql).QueryRows(&artList)
+	if err != nil {
+		fmt.Println(res, err)
+		return nil, err
+	}
+
+	//fmt.Println(id)
+	return artList, nil
 }
