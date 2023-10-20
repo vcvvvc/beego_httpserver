@@ -18,4 +18,9 @@ func init() {
 	web.CtrlPost("/user_login", (*controllers.LoginController).Login)
 	web.CtrlGet("/session_input", (*controllers.LoginController).TestInputGet)
 	web.CtrlGet("/exit", (*controllers.LoginController).UserExit)
+
+	//Write
+	web.CtrlGet("/article/add", (*controllers.ArticleController).WritePage)
+	web.CtrlPost("/article/create", (*controllers.ArticleController).AddArticle)
+	web.CtrlPost("/article/update", (*controllers.ArticleController).UpdateArticle)
 }
