@@ -31,7 +31,7 @@ func (wr *ArticleController) AddArticle() {
 	}
 	fmt.Printf("title:%s,tags:%s\n", title, tags)
 	//实例化model，将它出入到数据库中
-	art := models.Article{0, title, author.(string), tags, short, content, time.Now()}
+	art := models.Article{0, title, tags, short, content, author.(string), time.Now()}
 	succ_add := models.AddArticle(art)
 	//返回数据给浏览器
 	if succ_add {

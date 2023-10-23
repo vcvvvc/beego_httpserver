@@ -24,7 +24,7 @@ func (this *HomeController) HomePage() {
 		artList, err := models.FindArticle(page)
 		fmt.Println(err)
 		this.Data["PageCode"] = 1
-		this.Data["HasFooter"] = true
+		this.Data["HasFooter"] = false
 		fmt.Println("IsLogin:", this.IsLogin, this.Loginuser)
 		this.Data["Content"] = models.MakeHomeBlocks(artList, this.IsLogin)
 		this.TplName = "home.html"
