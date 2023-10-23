@@ -105,7 +105,7 @@ func MakeHomeBlocks(articles []Article, isLogin bool) template.HTML {
 		homeParam.Short = art.Short
 		homeParam.Content = art.Content
 		homeParam.Author = art.Author
-		homeParam.CreateTime = art.Createtime.String()
+		homeParam.CreateTime = art.Createtime.Format("2006-01-02 15:04:05")
 		homeParam.Link = "/article/" + strconv.Itoa(art.Id)
 		homeParam.UpdateLink = "/article/update?id=" + strconv.Itoa(art.Id)
 		homeParam.DeleteLink = "/article/delete?id=" + strconv.Itoa(art.Id)
@@ -115,7 +115,7 @@ func MakeHomeBlocks(articles []Article, isLogin bool) template.HTML {
 		//ParseFile解析该文件，用于插入变量
 		t, _ := template.ParseFiles("views/block/home_block.html")
 		buffer := bytes.Buffer{}
-		//就是将html文件里面的比那两替换为穿进去的数据
+		//就是将html文件替换为传入的数据
 		t.Execute(&buffer, homeParam)
 		htmlHome += buffer.String()
 	}
