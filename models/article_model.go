@@ -3,6 +3,7 @@ package models
 import (
 	"github.com/beego/beego/v2/client/orm"
 	"httpserver/util"
+	"strconv"
 	"time"
 )
 
@@ -40,4 +41,42 @@ func AddArticle(article Article) bool {
 	sql := qb.String()
 	succ_add := util.InsertArticleDB(sql, article.Title, article.Author, article.Tags, article.Short, article.Content)
 	return succ_add
+}
+
+func GetArticleNum() int {
+	qb, _ := orm.NewQueryBuilder("mysql")
+	// 构建查询对象
+	qb.Select("COUNT(*) AS total").From("User.article")
+	sql := qb.String()
+	str_artnums := util.CountArticles(sql)
+	artnums, _ := strconv.Atoi(str_artnums)
+	return artnums
+}
+
+func QueryArticleId(id int) ([]Article, error) {
+	qb, _ := orm.NewQueryBuilder("mysql")
+	// 构建查询对象
+	qb.Select("*").From("User.article").Where("id = ?")
+	sql := qb.String()
+	var artList []Article
+	utilArtList, err := util.WhereIdArticleDB(sql, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, utilArt := range utilArtList {
+		art := Article{
+			Id:         utilArt.Id,
+			Title:      utilArt.Title,
+			Tags:       utilArt.Tags,
+			Short:      utilArt.Short,
+			Content:    utilArt.Content,
+			Author:     utilArt.Author,
+			Createtime: utilArt.Createtime,
+		}
+		artList = append(artList, art)
+	}
+	//reflect反射
+	return artList, nil
 }

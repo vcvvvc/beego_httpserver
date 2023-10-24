@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/beego/beego/v2/server/web"
 	"httpserver/models"
+	"strconv"
 	"time"
 )
 
@@ -12,6 +13,12 @@ type ArticleController struct {
 }
 
 func (wr *ArticleController) WritePage() {
+	author := wr.GetSession("Loginuser")
+	if author == nil {
+		wr.Redirect("/login", 302)
+		return
+	}
+	wr.Data["IsLogin"] = true
 	wr.TplName = "write_article.html"
 }
 
@@ -29,6 +36,8 @@ func (wr *ArticleController) AddArticle() {
 		wr.Redirect("/login", 302)
 		return
 	}
+
+	wr.Data["IsLogin"] = true
 	fmt.Printf("title:%s,tags:%s\n", title, tags)
 	//实例化model，将它出入到数据库中
 	art := models.Article{0, title, tags, short, content, author.(string), time.Now()}
@@ -47,3 +56,25 @@ func (ua *ArticleController) UpdateArticle() {
 }
 
 //func ()
+
+func (ac *ArticleController) ArticleContent() {
+	idStr := ac.Ctx.Input.Param(":id")
+	id, _ := strconv.Atoi(idStr)
+	fmt.Println("id:", id)
+	//获取id所对应的文章信息
+	art, err := models.QueryArticleId(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	ac.Data["Title"] = art[0].Title
+	ac.Data["Content"] = art[0].Content
+	////this.Data["Content"] = utils.SwitchMarkdownToHtml(art.Content)
+
+	author := ac.GetSession("Loginuser")
+	if author != nil {
+		ac.Data["IsLogin"] = true
+	}
+
+	ac.TplName = "show_article.html"
+}
