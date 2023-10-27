@@ -24,6 +24,7 @@ func (wr *ArticleController) WritePage() {
 
 func (wr *ArticleController) AddArticle() {
 	//获取浏览器传输的数据，通过表单的name属性获取值
+	id, _ := wr.GetInt("id")
 	title := wr.GetString("title")
 	tags := wr.GetString("tags")
 	short := wr.GetString("short")
@@ -40,7 +41,7 @@ func (wr *ArticleController) AddArticle() {
 	wr.Data["IsLogin"] = true
 	fmt.Printf("title:%s,tags:%s\n", title, tags)
 	//实例化model，将它出入到数据库中
-	art := models.Article{0, title, tags, short, content, author.(string), time.Now()}
+	art := models.Article{id, title, tags, short, content, author.(string), time.Now()}
 	succ_add := models.AddArticle(art)
 	//返回数据给浏览器
 	if succ_add {
@@ -52,7 +53,39 @@ func (wr *ArticleController) AddArticle() {
 	wr.ServeJSON()
 }
 
+func (ed *ArticleController) EditArticle() {
+	id, _ := ed.GetInt("id")
+	fmt.Println(id)
+	//获取id所对应的文章信息
+	art, err := models.QueryArticleId(id)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	ed.Data["Title"] = art[0].Title
+	ed.Data["Tags"] = art[0].Tags
+	ed.Data["Short"] = art[0].Short
+	ed.Data["Content"] = art[0].Content
+	ed.Data["Id"] = art[0].Id
+
+	author := ed.GetSession("Loginuser")
+	if author == nil {
+		ed.Data["json"] = map[string]interface{}{"code": -31, "message": "用户未登陆"}
+		ed.ServeJSON()
+
+		ed.Redirect("/login", 302)
+		return
+	}
+	ed.Data["IsLogin"] = true
+	ed.TplName = "write_article.html"
+}
+
 func (ua *ArticleController) UpdateArticle() {
+	fmt.Println("UpdateArticle ")
+}
+
+func (de *ArticleController) DeleteArticle() {
+	fmt.Println("delete article")
 }
 
 //func ()
