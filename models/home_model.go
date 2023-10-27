@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/config"
+	beego "github.com/beego/beego/v2/server/web"
 	"html/template"
 	"httpserver/util"
 	"strconv"
@@ -79,7 +80,6 @@ func FindArticleCon(page int, num int) ([]Article, error) {
 		}
 		artList = append(artList, art)
 	}
-	//reflect反射
 	return artList, nil
 }
 
@@ -107,7 +107,7 @@ func MakeHomeBlocks(articles []Article, isLogin bool) template.HTML {
 		homeParam.Author = art.Author
 		homeParam.CreateTime = art.Createtime.Format("2006-01-02 15:04:05")
 		homeParam.Link = "/article/" + strconv.Itoa(art.Id)
-		homeParam.UpdateLink = "/article/update?id=" + strconv.Itoa(art.Id)
+		homeParam.UpdateLink = "/article/editarticle?id=" + strconv.Itoa(art.Id)
 		homeParam.DeleteLink = "/article/delete?id=" + strconv.Itoa(art.Id)
 		homeParam.IsLogin = isLogin
 
@@ -122,3 +122,35 @@ func MakeHomeBlocks(articles []Article, isLogin bool) template.HTML {
 	fmt.Println("htmlHome-->", htmlHome)
 	return template.HTML(htmlHome)
 }
+
+// -----------翻页-----------
+func ConfigHomepagenum(page int) HomeFooterPageCode {
+	pageCode := HomeFooterPageCode{}
+	//查询出总的条数
+	nums := GetArticleNum()
+	//从配置文件中读取每页显示的条数
+	pageRow, _ := beego.AppConfig.Int("articleListPageNum")
+	//计算出总页数
+	allPageNum := (nums-1)/pageRow + 1
+	pageCode.ShowPage = fmt.Sprintf("%d/%d", page, allPageNum)
+	//当前页数小于等于1，那么上一页的按钮不能点击
+	if page <= 1 {
+		pageCode.HasPre = false
+	} else {
+		pageCode.HasPre = true
+	}
+	//当前页数大于等于总页数，那么下一页的按钮不能点击
+	if page >= allPageNum {
+		pageCode.HasNext = false
+	} else {
+		pageCode.HasNext = true
+	}
+	pageCode.PreLink = "/?page=" + strconv.Itoa(page-1)
+	pageCode.NextLink = "/?page=" + strconv.Itoa(page+1)
+	return pageCode
+}
+
+// 设置页数
+//func SetArticleRowsNum() {
+//	artcileRowsNum = ConfigHomepagenum()
+//}
