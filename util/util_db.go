@@ -198,3 +198,30 @@ func QueryArticleDB(sql string) ([]Article, error) {
 	//fmt.Println(id)
 	return artList, nil
 }
+
+func CountArticles(sql string) string {
+	// 构建查询对象
+	o := orm.NewOrm()
+
+	var maps []orm.Params
+	_, err := o.Raw(sql).Values(&maps)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	nums := maps[0]["total"].(string)
+	return nums
+}
+
+func WhereIdArticleDB(sql string, id int) ([]Article, error) {
+	o := orm.NewOrm()
+	var artList []Article
+	res, err := o.Raw(sql, id).QueryRows(&artList)
+	if err != nil {
+		fmt.Println(res, err)
+		return nil, err
+	}
+
+	//fmt.Println(id)
+	return artList, nil
+}
