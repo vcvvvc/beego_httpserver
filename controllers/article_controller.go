@@ -81,14 +81,51 @@ func (ed *ArticleController) EditArticle() {
 }
 
 func (ua *ArticleController) UpdateArticle() {
-	fmt.Println("UpdateArticle ")
+	id, _ := ua.GetInt("id")
+	title := ua.GetString("title")
+	tags := ua.GetString("tags")
+	short := ua.GetString("short")
+	content := ua.GetString("content")
+	author := ua.GetSession("Loginuser")
+	if author == nil {
+		ua.Data["json"] = map[string]interface{}{"code": -31, "message": "用户未登陆"}
+		ua.ServeJSON()
+		ua.Redirect("/login", 302)
+		return
+	}
+
+	ua.Data["IsLogin"] = true
+	art := models.Article{id, title, tags, short, content, author.(string), time.Now()}
+	succ_update := models.QueryUpdateArticle(art)
+	if succ_update {
+		ua.Data["json"] = map[string]interface{}{"code": 4, "message": "文章更新成功"}
+	} else {
+		ua.Data["json"] = map[string]interface{}{"code": -41, "message": "文章更新出错"}
+	}
+
+	ua.ServeJSON()
 }
 
 func (de *ArticleController) DeleteArticle() {
-	fmt.Println("delete article")
-}
+	id, _ := de.GetInt("id")
+	author := de.GetSession("Loginuser")
+	if author == nil {
+		de.Data["json"] = map[string]interface{}{"code": -31, "message": "用户未登陆"}
+		de.ServeJSON()
+		de.Redirect("/login", 302)
+		return
+	}
 
-//func ()
+	de.Data["IsLogin"] = true
+	succ_del := models.QueryDeleteArticle(id, author.(string))
+	if succ_del {
+		de.Data["json"] = map[string]interface{}{"code": 5, "message": "文章删除成功"}
+	} else {
+		de.Data["json"] = map[string]interface{}{"code": -51, "message": "文章删除出错"}
+	}
+
+	de.ServeJSON()
+}
 
 func (ac *ArticleController) ArticleContent() {
 	idStr := ac.Ctx.Input.Param(":id")
