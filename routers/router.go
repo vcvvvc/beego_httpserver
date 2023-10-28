@@ -22,5 +22,10 @@ func init() {
 	//Write
 	web.CtrlGet("/article/add", (*controllers.ArticleController).WritePage)
 	web.CtrlPost("/article/create", (*controllers.ArticleController).AddArticle)
-	web.CtrlPost("/article/update", (*controllers.ArticleController).UpdateArticle)
+
+	//Article
+	web.CtrlGet("/article/:id([0-9]+)", (*controllers.ArticleController).ArticleContent)
+	web.CtrlGet("/article/editarticle", (*controllers.ArticleController).EditArticle)
+	web.CtrlPost("/article/updatearticle", (*controllers.ArticleController).UpdateArticle)
+	web.CtrlGet("/article/delete)", (*controllers.ArticleController).DeleteArticle)
 }
