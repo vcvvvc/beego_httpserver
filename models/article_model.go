@@ -80,3 +80,27 @@ func QueryArticleId(id int) ([]Article, error) {
 	//reflect反射
 	return artList, nil
 }
+
+func QueryUpdateArticle(article Article) bool {
+	qb, _ := orm.NewQueryBuilder("mysql")
+	// 构建查询对象
+	qb.Update("User.article").Set("title = ?", "author = ?", "tags = ?", "short = ?", "content = ?").Where("id = ?")
+	// 导出 SQL 语句
+	sql := qb.String()
+
+	succ_update := util.UpdateArticleDB(sql, article.Title, article.Author, article.Tags, article.Short, article.Content, article.Id)
+	return succ_update
+}
+
+func QueryDeleteArticle(id int, author string) bool {
+	qb, _ := orm.NewQueryBuilder("mysql")
+	// 构建查询对象
+	qb.Delete("User.article").Where("id = ?").And("author = ?")
+	//limit {number | all}：表示最多返回多少行数据，如果是all，表示返回所有数据。
+	//offset number：表示跳过多少行数据，从第number+1行开始返回。
+
+	// 导出 SQL 语句
+	sql := qb.String()
+	succ_update := util.DeleteArticleDB(sql, id, author)
+	return succ_update
+}
