@@ -225,3 +225,50 @@ func WhereIdArticleDB(sql string, id int) ([]Article, error) {
 	//fmt.Println(id)
 	return artList, nil
 }
+
+func CheckArticleAuthorDB(id int, author string) bool {
+	qb, _ := orm.NewQueryBuilder("mysql")
+	// 构建查询对象
+	qb.Select("author = ? As result").From("User.article").Where("id = ?")
+	sql := qb.String()
+
+	o := orm.NewOrm()
+	var maps []orm.Params
+	res, err := o.Raw(sql, author, id).Values(&maps)
+	if err != nil {
+		fmt.Println(res, err)
+	} else if maps[0]["result"].(string) != "1" {
+		fmt.Println("result = ", maps[0]["result"])
+		return false
+	}
+	return true
+}
+
+func UpdateArticleDB(sql string, title string, author string, tags string, short string, content string, id int) bool {
+	if CheckArticleAuthorDB(id, author) == false {
+		fmt.Println("作者不匹配")
+		return false
+	}
+	o := orm.NewOrm()
+	_, err := o.Raw(sql, title, author, tags, short, content, id).Exec()
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	return true
+}
+
+func DeleteArticleDB(sql string, id int, author string) bool {
+	if CheckArticleAuthorDB(id, author) == false {
+		fmt.Println("作者不匹配")
+		return false
+	}
+	o := orm.NewOrm()
+	_, err := o.Raw(sql, id, author).Exec()
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
