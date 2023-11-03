@@ -27,5 +27,8 @@ func init() {
 	web.CtrlGet("/article/:id([0-9]+)", (*controllers.ArticleController).ArticleContent)
 	web.CtrlGet("/article/editarticle", (*controllers.ArticleController).EditArticle)
 	web.CtrlPost("/article/updatearticle", (*controllers.ArticleController).UpdateArticle)
-	web.CtrlGet("/article/delete)", (*controllers.ArticleController).DeleteArticle)
+	web.CtrlGet("/article/delete", (*controllers.ArticleController).DeleteArticle)
+
+	//Tags
+	web.CtrlGet("/tags", (*controllers.TagsController).GetTagsList)
 }
