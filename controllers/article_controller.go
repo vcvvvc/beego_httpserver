@@ -125,6 +125,7 @@ func (de *ArticleController) DeleteArticle() {
 	}
 
 	de.ServeJSON()
+	de.Redirect("/login", 302)
 }
 
 func (ac *ArticleController) ArticleContent() {
