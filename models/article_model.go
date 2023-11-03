@@ -95,7 +95,7 @@ func QueryUpdateArticle(article Article) bool {
 func QueryDeleteArticle(id int, author string) bool {
 	qb, _ := orm.NewQueryBuilder("mysql")
 	// 构建查询对象
-	qb.Delete("User.article").Where("id = ?").And("author = ?")
+	qb.Delete().From("User.article").Where("id = ?").And("author = ?")
 	//limit {number | all}：表示最多返回多少行数据，如果是all，表示返回所有数据。
 	//offset number：表示跳过多少行数据，从第number+1行开始返回。
 
