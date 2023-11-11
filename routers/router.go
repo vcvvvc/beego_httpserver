@@ -31,4 +31,8 @@ func init() {
 
 	//Tags
 	web.CtrlGet("/tags", (*controllers.TagsController).GetTagsList)
+
+	//album
+	web.CtrlGet("/album", (*controllers.FileController).AlbumPage)
+	web.CtrlPost("/fileupload", (*controllers.FileController).FileUpload)
 }
