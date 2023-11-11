@@ -51,3 +51,34 @@ func QueryCheckFile(hash string) bool {
 	sql := qb.String()
 	return util.CheckFileDB(sql, hash)
 }
+
+func QueryFindAllFile() ([]File, error) {
+	qb, _ := orm.NewQueryBuilder("mysql")
+	// 构建查询对象
+	qb.Select("*").From("User.file").Limit(10)
+
+	// 导出 SQL 语句
+	sql := qb.String()
+	util_FileList, err := util.FindAllFileDB(sql)
+	if err != nil {
+		return nil, err
+	}
+	var albums []File
+	for _, m_file := range util_FileList {
+		mf := File{
+			Id:         m_file.Id,
+			FileName:   m_file.FileName,
+			FilePath:   m_file.FilePath,
+			Filehash:   m_file.Filehash,
+			Filetype:   m_file.Filetype,
+			Createtime: m_file.Createtime,
+		}
+		albums = append(albums, mf)
+	}
+	return albums, nil
+}
+
+// --------查询图片----------
+func FindAllAlbums() ([]File, error) {
+	return QueryFindAllFile()
+}

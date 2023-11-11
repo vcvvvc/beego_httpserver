@@ -50,7 +50,6 @@ func FindArticle(page int) ([]Article, error) {
 	num, _ := config.Int("articleListPageNum")
 	page--
 	return FindArticleCon(page, num)
-
 }
 
 func FindArticleCon(page int, num int) ([]Article, error) {
@@ -86,7 +85,7 @@ func FindArticleCon(page int, num int) ([]Article, error) {
 // 将tags字符串转化成首页模板所需要的数据结构
 func createTagsLinks(tags string) []TagLink {
 	var tagLink []TagLink
-	tagsPamar := strings.Split(tags, ",")
+	tagsPamar := strings.Split(tags, ", ")
 	for _, tag := range tagsPamar {
 		tagLink = append(tagLink, TagLink{tag, "/?tag=" + tag})
 	}
