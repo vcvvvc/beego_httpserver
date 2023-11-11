@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/beego/beego/v2/server/web"
 	"httpserver/models"
 	"httpserver/util"
@@ -13,6 +14,11 @@ type FileController struct {
 }
 
 func (file *FileController) AlbumPage() {
+	albums, err := models.FindAllAlbums()
+	if err != nil {
+		fmt.Println(err)
+	}
+	file.Data["Album"] = albums
 	file.TplName = "album.html"
 }
 
@@ -33,14 +39,14 @@ func (file *FileController) FileUpload() {
 	if fileExt == ".jpg" || fileExt == ".png" || fileExt == ".gif" || fileExt == ".jpeg" || fileExt == "webp" {
 		file_type = "img"
 	}
-	file_path := "./static/upload/" + file_name
+	file_path := "/static/upload/" + file_name
+	file.SaveToFile("uploadfile", "."+file_path)
 	file_hash := util.FileHash(file_path)
 
 	succ := models.QueryInsertFile(file_name, file_path, file_hash, file_type)
 	if !succ {
 		file.Data["json"] = map[string]interface{}{"code": 6, "message": "文件上传出错 || 已经存在"}
 	} else {
-		file.SaveToFile("uploadfile", "./static/upload/"+file_name)
 		file.Data["json"] = map[string]interface{}{"code": 6, "message": "文件上传成功"}
 	}
 
