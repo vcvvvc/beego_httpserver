@@ -170,9 +170,9 @@ $(document).ready(function () {
         }
         //文件上传通过Formdata去储存文件的数据
         var data = new FormData()
-        data.append("upload", $("#album-upload-file")[0].files[0]);
-        alert(data)
-        var urlStr = "/upload"
+        data.append("uploadfile", $("#album-upload-file")[0].files[0]);
+        // alert(data)
+        var urlStr = "/fileupload"
         $.ajax({
             url: urlStr,
             type: "post",
@@ -182,7 +182,7 @@ $(document).ready(function () {
             processData: false,
             success: function (data, status) {
                 alert(":data:" + data.message);
-                if (data.code == 1) {
+                if (data.code == 6) {
                     setTimeout(function () {
                         window.location.href = "/album"
                     }, 1000)
