@@ -37,6 +37,15 @@ type Article struct {
 	Createtime time.Time `orm:"column(create_time)"`
 }
 
+type File struct {
+	Id         int       `orm:"column(id);auto;index;unique"`
+	FileName   string    `orm:"column(filename)"`
+	FilePath   string    `orm:"column(filepath)"`
+	Filehash   string    `orm:"column(filehash)"`
+	Filetype   string    `orm:"column(filetype)"`
+	Createtime time.Time `orm:"column(create_time)"`
+}
+
 func Init() {
 	dbhost, _ := config.String("dbhost")
 	dbport, _ := config.String("dbport")
@@ -50,7 +59,7 @@ func Init() {
 	orm.RegisterDataBase("default", "mysql", dsn)
 	//orm.RegisterModel(new(User), new(Category), new(Post), new(Config), new(Comment))
 	// need to register models in init
-	orm.RegisterModel(new(User), new(Article))
+	orm.RegisterModel(new(User), new(Article), new(File))
 
 	// need to register default database
 	//orm.RegisterDataBase("default", "mysql", "6923403:zxz123456@tcp(192.168.31.172:3306)/User?charset=utf8&parseTime=true&loc=Local")
@@ -271,4 +280,60 @@ func DeleteArticleDB(sql string, id int, author string) bool {
 		return false
 	}
 	return true
+}
+
+func CreateTagsListDB(sql string) []string {
+	o := orm.NewOrm()
+	var tagslist []string
+	_, err := o.Raw(sql).QueryRows(&tagslist)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	return tagslist
+}
+
+func QueryArticlesTagDB(sql string, tag string) ([]Article, error) {
+	o := orm.NewOrm()
+	var artList []Article
+	_, err := o.Raw(sql, "%"+tag+"%").QueryRows(&artList)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return artList, nil
+}
+
+func InsertFileDB(sql string, file_name string, file_path string, file_hash string, file_type string) bool {
+	o := orm.NewOrm()
+	_, err := o.Raw(sql, file_name, file_path, file_hash, file_type, time.Now()).Exec()
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
+
+func CheckFileDB(sql string, hash string) bool {
+	o := orm.NewOrm()
+	var file File
+	err := o.Raw(sql, hash).QueryRow(&file)
+	if err == nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
+}
+
+func FindAllFileDB(sql string) ([]File, error) {
+	o := orm.NewOrm()
+	var File_list []File
+	_, err := o.Raw(sql).QueryRows(&File_list)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return File_list, err
 }
